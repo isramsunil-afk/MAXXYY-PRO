@@ -6,13 +6,20 @@ import os
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
-@app.get("/logo.png")
-def logo():
-    if os.path.exists("logo.png"):
-        return FileResponse("logo.png")
-    if os.path.exists("templates/logo.png"):
-        return FileResponse("templates/logo.png")
-    return {"error": "logo not found"}
+from fastapi.staticfiles import StaticFiles
+import os
+
+# Ee line app = FastAPI() ki kinda pettu
+app.mount("/", StaticFiles(directory=".", html=False), name="static_root")
+
+# Tarvata kindha ee routes unchu - rendu
+@app.get("/manifest.json")
+def manifest_file():
+    return FileResponse("manifest.json")
+
+@app.get("/sw.js")
+def sw_file():
+    return FileResponse("sw.js")
 
 @app.get("/manifest.json")
 def manifest_file():
