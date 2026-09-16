@@ -14,7 +14,13 @@ def logo():
     if os.path.exists("templates/logo.png"):
         return FileResponse("templates/logo.png")
     return {"error": "logo not found"}
+@app.get("/manifest.json")
+def manifest_file():
+    return FileResponse("manifest.json")
 
+@app.get("/sw.js")
+def sw_file():
+    
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     return templates.TemplateResponse("dashboard.html", {"request": request})
