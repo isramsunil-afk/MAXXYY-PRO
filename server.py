@@ -1,8 +1,13 @@
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from fastapi import FastAPI, Request, UploadFile, File, Form
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import FileResponse, RedirectResponse
 import os, json
 app = FastAPI()
+@app.get("/logo.png")
+def get_logo():
+    return FileResponse("logo.png")
 templates = Jinja2Templates(directory="templates")
 os.makedirs("uploads", exist_ok=True)
 os.makedirs("data", exist_ok=True)
