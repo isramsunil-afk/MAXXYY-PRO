@@ -2,27 +2,29 @@
 <!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 body{font-family:sans-serif;background:#f5f5ff;margin:0;padding:10px}
-.header{background:linear-gradient(135deg,#00c6ff,#0072ff);color:white;padding:20px;border-radius:15px;display:flex;justify-content:space-between}
+.header{background:linear-gradient(135deg,#00c6ff,#0072ff);color:white;padding:20px;border-radius:15px;display:flex;justify-content:space-between;align-items:center}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px}
 .card{background:white;padding:15px;border-radius:15px;min-height:200px}
-.btn{background:#0072ff;color:white;padding:8px 12px;border:none;border-radius:8px;cursor:pointer}
+.btn{background:#0072ff;color:white;padding:8px 12px;border:none;border-radius:8px}
 .msg{padding:8px;background:#e0f0ff;border-radius:8px;margin:5px 0}
-#chatBox,#confBox{height:150px;overflow-y:auto;border:1px solid #eee;padding:5px;border-radius:10px;background:#fafafa}
+#chatBox,#confBox,#lostBox{height:150px;overflow-y:auto;border:1px solid #eee;padding:5px}
 </style></head><body>
-<div class="header"><div><div style="display:flex; align-items:center; gap:10px;"><img src="/logo.png" style="width:40px; height:40px; border-radius:10px;"><h2>MAXXYY</h2><p id="hi"></p></div><a href="/login" style="color:white">Logout</a></div>
+<div class="header"><div><div style="display:flex; align-items:center; gap:10px;"><img src="/logo.png" style="width:40px; height:40px; border-radius:10px;"><h2>MAXXYY</h2></div><p id="hi"></p></div><a href="/login" style="color:white;">Logout</a></div>
 <div class="grid">
-<div class="card"><h3>📚 Notes Share</h3><div id="flist"></div><br><input type="file" id="f"><button class="btn" onclick="up()">Upload</button></div>
-<div class="card"><h3>💬 Live Chat</h3><div id="chatBox"></div><input id="txt" placeholder="Message" style="width:60%;padding:6px"><button class="btn" onclick="sendChat()">Send</button></div>
-<div class="card"><h3>🤫 Confession Wall</h3><div id="confBox"></div><input id="cTxt" placeholder="Secret..." style="width:60%;padding:6px"><button class="btn" onclick="sendConf()">Post</button></div>
-<div class="card"><h3>🚀 Coming Soon - Phase 2</h3><p>Lost & Found<br>Buy/Sell<br>Canteen Order</p></div>
+<div class="card"><h3>📚 Notes Share</h3><div id="flist"></div><input type="file" id="file"><button class="btn" onclick="up()">Upload</button></div>
+<div class="card"><h3>💬 Live Chat</h3><div id="chatBox"></div><input id="txt" placeholder="message..."><button class="btn" onclick="sendChat()">Send</button></div>
+<div class="card"><h3>🤫 Confession Wall</h3><div id="confBox"></div><input id="ctxt" placeholder="anonymous..."><button class="btn" onclick="sendConf()">Post</button></div>
+<div class="card"><h3>🔍 Lost & Found</h3><div id="lostBox"></div><input id="ltxt" placeholder="Lost ID / Found Keys..."><button class="btn" onclick="sendLost()">Post</button></div>
 </div>
 <script>
-let user=new URLSearchParams(location.search).get("user")||"Anon";document.getElementById("hi").innerText="Hi "+user+" !";
-async function loadChat(){let r=await fetch("/api/chats");let d=await r.json();let b=document.getElementById("chatBox");b.innerHTML="";d.slice(-10).forEach(m=>{b.innerHTML+=`<div class=msg><b>${m.user}:</b> ${m.text}</div>`});b.scrollTop=9999}
-async function sendChat(){let t=document.getElementById("txt").value;if(!t)return;await fetch("/api/chats",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({user:user,text:t})});document.getElementById("txt").value="";loadChat()}
-async function loadConf(){let r=await fetch("/api/confessions");let d=await r.json();let b=document.getElementById("confBox");b.innerHTML="";d.slice(-10).forEach(m=>{b.innerHTML+=`<div class=msg>${m.text}</div>`})}
-async function sendConf(){let t=document.getElementById("cTxt").value;if(!t)return;await fetch("/api/confessions",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:t})});document.getElementById("cTxt").value="";loadConf()}
-function up(){let fd=new FormData();fd.append("file",document.getElementById("f").files[0]);fetch("/upload",{method:"POST",body:fd}).then(()=>location.reload())}
-loadChat();loadConf();setInterval(()=>{loadChat();loadConf()},2000);
-fetch("/api/files").then(r=>r.json()).then(l=>{let d=document.getElementById("flist");l.forEach(f=>{d.innerHTML+=`<div style="display:flex;justify-content:space-between;margin:5px 0"><span>${f}</span><a class=btn href="/download/${f}">Get</a></div>`})})
+let user=new URLSearchParams(location.search).get("user")||"Anon";document.getElementById("hi").innerText="Hi, "+user
+async function loadChat(){let r=await fetch("/api/chats");let d=await r.json();let b=document.getElementById("chatBox");b.innerHTML=d.map(m=>`<div class=msg>${m}</div>`).join("");b.scrollTop=b.scrollHeight}
+async function sendChat(){let t=document.getElementById("txt").value;if(!t)return;await fetch("/api/chats",{method:"POST",body:new URLSearchParams({txt:user+": "+t})});document.getElementById("txt").value="";loadChat()}
+async function loadConf(){let r=await fetch("/api/confessions");let d=await r.json();let b=document.getElementById("confBox");b.innerHTML=d.map(m=>`<div class=msg>${m}</div>`).join("")}
+async function sendConf(){let t=document.getElementById("ctxt").value;if(!t)return;await fetch("/api/confessions",{method:"POST",body:new URLSearchParams({txt:t})});document.getElementById("ctxt").value="";loadConf()}
+async function loadLost(){let r=await fetch("/api/lost");let d=await r.json();let b=document.getElementById("lostBox");b.innerHTML=d.map(m=>`<div class=msg>${m}</div>`).join("")}
+async function sendLost(){let t=document.getElementById("ltxt").value;if(!t)return;await fetch("/api/lost",{method:"POST",body:new URLSearchParams({item:user+": "+t})});document.getElementById("ltxt").value="";loadLost()}
+async function up(){let fd=new FormData();fd.append("file",document.getElementById("f").files[0]);await fetch("/api/upload",{method:"POST",body:fd});loadFiles()}
+loadChat();loadConf();loadLost();setInterval(()=>{loadChat();loadConf();loadLost()},2000);
+fetch("/api/files").then(r=>r.json()).then(l=>{let d=document.getElementById("flist");d.innerHTML=l.map(f=>`<a href='/files/${f}' target=_blank>${f}</a>`).join("<br>")})
 </script></body></html>
