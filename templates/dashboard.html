@@ -1,62 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html><head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>MAXXYY PRO</title>
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#000000">
-<link rel="icon" href="/logo.png">
-<style>
-body{background:#000;color:#fff;font-family:Arial;text-align:center;padding:20px}
-h1{color:#00ff88;font-size:32px}
-.card{background:#111;border:1px solid #00ff88;border-radius:15px;padding:20px;margin:20px auto;max-width:400px}
-button{background:#00ff88;color:#000;border:none;padding:15px 30px;border-radius:10px;font-weight:bold;font-size:18px;width:100%}
-#installBtn{display:none;background:#fff;color:#000;margin-top:15px}
-</style>
-</head>
-<body>
-<h1>MAXXYY PRO 🔥</h1>
-<p>Trading Dashboard Live</p>
-
-<div class="card">
+<meta name="theme-color" content="#00ff00">
+<style>body{background:#000;color:#fff;font-family:sans-serif;text-align:center;padding:20px}h1{color:#0f0;font-size:30px}.box{border:2px solid #0f0;border-radius:12px;padding:20px;margin:20px auto;max-width:400px}#install{padding:15px 25px;background:#0f0;color:#000;border:none;border-radius:10px;font-weight:bold;font-size:18px;margin-top:10px}</style>
+</head><body>
+<h1>MAXXYY PRO LIVE 🔥</h1>
+<p>Final Dashboard Working!</p>
+<div class="box">
 <h2>Welcome Nanna!</h2>
-<p>App Ready To Install</p>
-<button onclick="location.reload()">Refresh Dashboard</button>
-<button id="installBtn">📲 Install App</button>
+<p id="msg">Checking PWA...</p>
+<button id="install">📲 INSTALL APP</button>
 </div>
-
-<div class="card">
-<p>✅ Server: LIVE</p>
-<p>✅ PWA: READY</p>
-<p id="pwaStatus">Checking...</p>
-</div>
-
 <script>
-// SERVICE WORKER REGISTER
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').then(()=>{
-    document.getElementById('pwaStatus').innerHTML='✅ App Install Ready!';
-  });
-}
-
-// INSTALL PROMPT
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e)=>{
-  e.preventDefault();
-  deferredPrompt=e;
-  document.getElementById('installBtn').style.display='block';
-});
-document.getElementById('installBtn').addEventListener('click', ()=>{
-  if(deferredPrompt){
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(choice=>{
-      if(choice.outcome==='accepted') alert('GETHU NANNA! App Installed 🔥');
-    });
-  } else {
-    alert('Chrome 3 dots -> Add to Home Screen nokku nanna!');
-  }
-});
-</script>
-</body>
-</html>
+if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').then(()=>{document.getElementById('msg').innerHTML='✅ PWA Ready! Install Chey!'})}
+let p;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();p=e;});
+document.getElementById('install').onclick=()=>{if(p){p.prompt();p.userChoice.then(r=>{if(r.outcome==='accepted')alert('GETHU NANNA! Installed! 🔥')})}else{alert('Chrome 3 dots -> Add to Home Screen nokku nanna!')}}
+</script></body></html>
