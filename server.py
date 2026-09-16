@@ -8,23 +8,16 @@ templates = Jinja2Templates(directory="templates")
 
 @app.get("/logo.png")
 def logo():
-    # logo ekkada unna chusi ivvu
     if os.path.exists("logo.png"):
         return FileResponse("logo.png")
     if os.path.exists("templates/logo.png"):
         return FileResponse("templates/logo.png")
     return {"error": "logo not found"}
+
 @app.get("/manifest.json")
 def manifest_file():
     return FileResponse("manifest.json")
 
 @app.get("/sw.js")
 def sw_file():
-    
-@app.get("/", response_class=HTMLResponse)
-def home(request: Request):
-    return templates.TemplateResponse("dashboard.html", {"request": request})
-
-@app.get("/api/ping")
-def ping():
-    return {"ok": True}
+    return FileResponse("sw.js")
