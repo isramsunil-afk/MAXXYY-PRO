@@ -1,51 +1,62 @@
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-from fastapi import FastAPI, Request, UploadFile, File, Form
+from fastapi import FastAPI, Request, Form, UploadFile
+from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import FileResponse, RedirectResponse
-import os, json
+import os, json, shutil
+
 app = FastAPI()
+templates = Jinja2Templates(directory="templates")
+
+# LOGO ROUTE - IMPORTANT
 @app.get("/logo.png")
 def get_logo():
     return FileResponse("logo.png")
-templates = Jinja2Templates(directory="templates")
-os.makedirs("uploads", exist_ok=True)
-os.makedirs("data", exist_ok=True)
-def load_db(n):
-    try: return json.load(open(f"data/{n}.json"))
-    except: return []
-def save_db(n,d):
-    json.dump(d, open(f"data/{n}.json","w"))
-@app.get("/")
-def root(): return RedirectResponse("/login")
-@app.get("/login")
-async def page(request: Request):
-    # FIXED FOR NEW VERSION
-    return templates.TemplateResponse(request, "login.html", {})
-@app.post("/login")
-async def login(username: str = Form(...)):
-    u=load_db("users")
-    if username not in [x["name"] for x in u]:
-        u.append({"name": username}); save_db("users",u)
-    return RedirectResponse(f"/dashboard?user={username}", status_code=302)
-@app.get("/dashboard")
-async def dash(request: Request, user: str="Anon"):
-    return templates.TemplateResponse(request, "dashboard.html", {"user": user})
+
+# DATA
+if not os.path.exists("data.json"):
+    with open("data.json","w") as f:
+        json.dump({"chats":[],"confessions":[],"lost":[]}, f)
+
+def get_data():
+    with open("data.json") as f:
+        return json.load(f)
+
+@app.get("/", response_class=HTMLResponse)
+def home(request: Request):
+    return templates.TemplateResponse("dashboard.html", {"request": request})
+
 @app.get("/api/chats")
-def gc(): return load_db("chats")
+def chats():
+    return get_data()["chats"][-50:]
+
 @app.post("/api/chats")
-async def pc(request: Request):
-    data=await request.json(); c=load_db("chats"); c.append(data); save_db("chats",c); return {"ok": True}
+async def post_chat(txt: str = Form(...)):
+    data = get_data()
+    data["chats"].append(txt)
+    with open("data.json","w") as f:
+        json.dump(data,f)
+    return {"ok":True}
+
 @app.get("/api/confessions")
-def gcf(): return load_db("confessions")
+def confs():
+    return get_data()["confessions"][-50:]
+
 @app.post("/api/confessions")
-async def pcf(request: Request):
-    data=await request.json(); c=load_db("confessions"); c.append(data); save_db("confessions",c); return {"ok": True}
-@app.get("/api/files")
-def gf(): return os.listdir("uploads")
-@app.post("/upload")
-async def up(file: UploadFile = File(...)):
-    open(os.path.join("uploads", file.filename), "wb").write(await file.read()); return {"ok": True}
-@app.get("/download/{name}")
-async def dl(name: str):
-    return FileResponse(os.path.join("uploads", name), filename=name)
+async def post_conf(txt: str = Form(...)):
+    data = get_data()
+    data["confessions"].append(txt)
+    with open("data.json","w") as f:
+        json.dump(data,f)
+    return {"ok":True}
+
+# NEW - LOST & FOUND
+@app.get("/api/lost")
+def lost():
+    return get_data()["lost"]
+
+@app.post("/api/lost")
+async def post_lost(item: str = Form(...)):
+    data = get_data()
+    data["lost"].append(item)
+    with open("data.json","w") as f:
+        json.dump(data,f)
+    return {"ok":True}
